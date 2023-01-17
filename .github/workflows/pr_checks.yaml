@@ -1,0 +1,17 @@
+name: Pull request checks
+run-name: PR checks
+on:
+  pull_request:
+    types: [opened, synchronize, edited]
+permissions: write-all
+
+jobs:
+  pr_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: run pr checks
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .github/pr_checks_config.yaml
