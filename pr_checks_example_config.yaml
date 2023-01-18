@@ -13,7 +13,6 @@ pr_checks:
     - name: 'docs_check'
       regex: 'https://docs\.example\.com' # Matching anywhere in the description
       message_if_not_matching: 'PR description must contain a link to the docs'
-      message_if_matching: 'PR description contains a link to the docs'
 
   file_path:
     - name: 'core_platform'

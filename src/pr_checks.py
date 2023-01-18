@@ -73,6 +73,10 @@ class PRChecks:
     def pr(self):
         return self.repository.get_pull(self.event["number"])
 
+    def create_comment_conditionally(self, comment):
+        if comment:
+            self.pr.create_issue_comment(comment)
+
     def run(self):
         if self.event_name != "pull_request":
             print(f"Event {self.event_name} not supported, this action only supports pull_request events")
@@ -98,17 +102,17 @@ class PRChecks:
         title = self.pr.title
         for check in self.config["pr_checks"]["title"]:
             if re.match(check["regex"], title):
-                self.pr.create_issue_comment(check["message_if_matching"])
+                self.create_comment_conditionally(check["message_if_matching"])
             else:
-                self.pr.create_issue_comment(check["message_if_not_matching"])
+                self.create_comment_conditionally(check["message_if_not_matching"])
 
     def run_description_checks(self):
         description = self.pr.body
         for check in self.config["pr_checks"]["description"]:
             if re.match(check["regex"], description):
-                self.pr.create_issue_comment(check["message_if_matching"])
+                self.create_comment_conditionally(check["message_if_matching"])
             else:
-                self.pr.create_issue_comment(check["message_if_not_matching"])
+                self.create_comment_conditionally(check["message_if_not_matching"])
 
     def run_files_changed_checks(self):
         files_changed = self.pr.get_files()
