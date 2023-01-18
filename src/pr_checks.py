@@ -88,6 +88,7 @@ class PRChecks:
             print(f"Github API error running checks: {e}. Check your configuration file and repository permissions.")
         except Exception as e:
             print(f"Error running checks: {e}")
+            raise e
         else:
             print("PR checks completed successfully")
             return True
@@ -102,24 +103,28 @@ class PRChecks:
         title = self.pr.title
         for check in self.config["pr_checks"]["title"]:
             if re.match(check["regex"], title):
-                self.create_comment_conditionally(check["message_if_matching"])
+                self.create_comment_conditionally(check.get("message_if_matching"))
             else:
-                self.create_comment_conditionally(check["message_if_not_matching"])
+                self.create_comment_conditionally(check.get("message_if_not_matching"))
 
     def run_description_checks(self):
         description = self.pr.body
         for check in self.config["pr_checks"]["description"]:
             if re.match(check["regex"], description):
-                self.create_comment_conditionally(check["message_if_matching"])
+                self.create_comment_conditionally(check.get("message_if_matching"))
             else:
-                self.create_comment_conditionally(check["message_if_not_matching"])
+                self.create_comment_conditionally(check.get("message_if_not_matching"))
 
     def run_files_changed_checks(self):
         files_changed = self.pr.get_files()
+        reviewers_to_assign = set()
         for check in self.config["pr_checks"]["file_path"]:
             for file in files_changed:
                 if re.match(check["regex"], file.filename):
-                    self.pr.create_review_request(check["reviewers"])
+                    reviewers = check.get("reviewers")
+                    reviewers_to_assign.update(reviewers)
+        if reviewers_to_assign:
+            self.pr.create_review_request(reviewers=list(reviewers_to_assign))
 
 
 if __name__ == "__main__":
