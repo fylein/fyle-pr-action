@@ -1,0 +1,26 @@
+pr_checks:
+  title:
+    - name: 'prefix_check'
+      regex: '^(fix|feat)'
+      message_if_not_matching: 'PR title must start with "fix" or "feat"' # optional
+      message_if_matching: 'PR title starts with "fix" or "feat"' # optional - provide at least one of these
+    - name: 'issue_check'
+      regex: 'JIRA-[0-9]+'
+      message_if_not_matching: 'PR title must contain a JIRA issue'
+      message_if_matching: 'PR title contains a JIRA issue'
+
+  description:
+    - name: 'docs_check'
+      regex: 'https://docs\.example\.com' # Matching anywhere in the description
+      message_if_not_matching: 'PR description must contain a link to the docs'
+
+  file_path:
+    - name: 'core_platform'
+      regex: '^/core/platform/*' # Regex for matching file path, relative to the root of the repository
+      reviewers:
+        - 'franciszekzak' # Use GitHub usernames
+        - 'john345'
+    - name: 'core_ui'
+      regex: '^/core/ui/*'
+      reviewers:
+        - 'micheal345'
