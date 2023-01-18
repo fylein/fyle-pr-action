@@ -27,6 +27,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/pr_checks_config.yaml
 ```
+The code must be checked out before running the action.
 
 *Important*: The `github-token` input is required for this action to work. It should be set to `${{ secrets.GITHUB_TOKEN }}`.
 This will pass an ephemeral token to the action which will be used to access the pull request.
