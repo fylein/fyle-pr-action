@@ -108,7 +108,7 @@ class PRChecks:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
 
     def run_description_checks(self):
-        description = self.pr.body
+        description = self.pr.body or ""  # body can be None, using empty string for regex matching
         for check in self.config["pr_checks"]["description"]:
             if re.match(check["regex"], description):
                 self.create_comment_conditionally(check.get("message_if_matching"))
