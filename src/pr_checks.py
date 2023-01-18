@@ -22,38 +22,77 @@ To configure this action, you need to create a file called .github/pr_checks_con
 class PRChecks:
 
     def __init__(self, config_path, github_token, event_file, event_name, github_url, *kwargs):
-        self.config = yaml.load(open(config_path), Loader=yaml.FullLoader)
         self.github = github.Github(base_url=github_url, login_or_token=github_token)
-        self.event = json.load(open(event_file))
         self.event_name = event_name
-        self.repository = self.github.get_repo(self.event["repository"]["full_name"], lazy=True)
+
+        self.config = self.load_config(config_path)
+        self.event = self.load_event(event_file)
+
+        self.repository = self.load_repository()
+
+    def load_config(self, config_path):
+        try:
+            config = yaml.load(open(config_path), Loader=yaml.FullLoader)
+        except FileNotFoundError:
+            print(f"Configuration file not found at {config_path}.")
+            sys.exit(1)
+        except yaml.YAMLError as e:
+            print(f"Error parsing configuration file: {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error loading configuration file: {e}")
+            sys.exit(1)
+        else:
+            return config
+
+    def load_event(self, event_file):
+        try:
+            event = json.load(open(event_file))
+        except FileNotFoundError:
+            print(f"Event file not found at {event_file}.")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error loading event file: {e}")
+            sys.exit(1)
+        else:
+            return event
+
+    def load_repository(self):
+        try:
+            repository = self.github.get_repo(self.event["repository"]["full_name"])
+        except github.GithubException as e:
+            print(f"Github error loading repository: {e}. Check configuration file and repository permissions.")
+            sys.exit(1)
+        except Exception as e:
+            print(f"Error loading repository: {e}")
+            sys.exit(1)
+        else:
+            return repository
 
     @cached_property
     def pr(self):
         return self.repository.get_pull(self.event["number"])
 
     def run(self):
-        print("===========DEBUG===============")
-        print(self.event)
-        print(self.pr)
-        print("----------DEBUG----END-----")
-        user = self.github.get_user()
-
         if self.event_name != "pull_request":
             print(f"Event {self.event_name} not supported, this action only supports pull_request events")
-            sys.exit(1)
+            return False
+        try:
+            self._run_checks()
+            self.pr.update()
+        except github.GithubException as e:
+            print(f"Github API error running checks: {e}. Check your configuration file and repository permissions.")
+        except Exception as e:
+            print(f"Error running checks: {e}")
+        else:
+            print("PR checks completed successfully")
+            return True
 
+    def _run_checks(self):
         print(f"Running PR checks for PR #{self.pr.number} ({self.pr.title})")
         self.run_title_checks()
         self.run_description_checks()
         self.run_files_changed_checks()
-        success = self.pr.update()
-        if success:
-            print("PR checked and updated successfully")
-            return True
-        else:
-            print("PR update failed")
-            return False
 
     def run_title_checks(self):
         title = self.pr.title
@@ -81,24 +120,14 @@ class PRChecks:
 
 if __name__ == "__main__":
 
-    config_path = os.environ.get("INPUT_CONFIG_FILE")
-    github_token = os.environ.get("GITHUB_TOKEN")
-    github_url = os.environ.get("GITHUB_API_URL")
-    event_file = os.environ.get("GITHUB_EVENT_PATH")
-    event_name = os.environ.get("GITHUB_EVENT_NAME")
-    workspace = os.environ.get("GITHUB_WORKSPACE")
-
-    GITHUB_ENV = os.environ.get("GITHUB_ENV")
-
-    print(os.environ)
-
     pr_checks = PRChecks(
-        config_path=config_path,
-        github_token=github_token,
-        event_file=event_file,
-        event_name=event_name,
-        github_url=github_url,
+        config_path=os.environ.get("INPUT_CONFIG_FILE"),
+        github_token=os.environ.get("GITHUB_TOKEN"),
+        event_file=os.environ.get("GITHUB_EVENT_PATH"),
+        event_name=os.environ.get("GITHUB_EVENT_NAME"),
+        github_url=os.environ.get("GITHUB_API_URL"),
     )
+
     success = pr_checks.run()
 
     if success:
