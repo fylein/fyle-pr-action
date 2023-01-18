@@ -1,4 +1,4 @@
-name: 'PR Checks'
+name: 'Fyle Pr Action'
 description: 'Checks for pull requests'
 inputs:
   github-token:
