@@ -9,21 +9,8 @@ inputs:
     required: true
     default: '.github/pr_checks_config.yaml'
 runs:
-  using: 'composite'
-  steps:
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    - name: Install Dependencies
-      run: pip install -r requirements.txt
-      shell: bash
-    - name: pass inputs
-      run: |
-        echo "GITHUB_TOKEN=${{ inputs.github-token }}" >> $GITHUB_ENV
-        echo "INPUT_CONFIG_FILE=${{ inputs.config-file }}" >> $GITHUB_ENV
-      shell: bash
-    - name: Run PR Checks
-      id: pr_checks
-      run: python src/pr_checks.py
-      shell: bash
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.github-token }}
+    - ${{ inputs.config-file }}

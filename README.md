@@ -15,28 +15,28 @@ on:
     types: [opened, synchronize, edited]
 permissions: 
   pull-requests: write
+  contents: read
   
 jobs:
   pr_checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
       - name: run pr checks
         uses: fylein/fyle-pr-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/pr_checks_config.yaml
 ```
-The code must be checked out before running the action.
-
 *Important*: The `github-token` input is required for this action to work. It should be set to `${{ secrets.GITHUB_TOKEN }}`.
 This will pass an ephemeral token to the action which will be used to access the pull request.
 
 The config file is optional and defaults to `.github/pr_checks_config.yaml`.
 
-It's also important to run this action only on the `pull_request` event, and to specify the types - otherwise the action will not be
-able to run on editing the pull request.
-The action needs `write` permissions to the pull request, so make sure to specify that in the permissions section.
+It's also important to run this action only on the `pull_request` event, and to specify the types - otherwise 
+the action will not be able to run on editing the pull request.
+
+The action needs `write` permissions to the pull request to create comments, and `read
+permissions to contents in order to read the config file, so make sure to specify that in the permissions section.
 
 ## Configuration
 

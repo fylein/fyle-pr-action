@@ -24,28 +24,29 @@ class PRChecks:
     def __init__(self, config_path, github_token, event_file, event_name, github_url, *kwargs):
         self.github = github.Github(base_url=github_url, login_or_token=github_token)
         self.event_name = event_name
+        self.event = self.load_event(event_file)
+        self.repository = self.load_repository()
 
         self.config = self.load_config(config_path)
-        self.event = self.load_event(event_file)
-
-        self.repository = self.load_repository()
 
     def load_config(self, config_path):
         try:
-            config = yaml.load(open(config_path), Loader=yaml.FullLoader)
-        except FileNotFoundError:
-            print(f"Configuration file not found at {config_path}.")
-            sys.exit(1)
+            config = yaml.load(self.repository.get_contents(config_path, self.pr.head.sha).decoded_content,
+                               Loader=yaml.FullLoader)
+        except github.GithubException as e:
+            print(f"Configuration file not found at {config_path}: {e}.")
+            raise e
         except yaml.YAMLError as e:
             print(f"Error parsing configuration file: {e}")
-            sys.exit(1)
+            raise e
         except Exception as e:
             print(f"Error loading configuration file: {e}")
-            sys.exit(1)
+            raise e
         else:
             return config
 
-    def load_event(self, event_file):
+    @staticmethod
+    def load_event(event_file):
         try:
             event = json.load(open(event_file))
         except FileNotFoundError:
@@ -101,7 +102,7 @@ class PRChecks:
 
     def run_title_checks(self):
         title = self.pr.title
-        for check in self.config["pr_checks"]["title"]:
+        for check in self.config["pr_checks"].get("title", []):
             if re.match(check["regex"], title):
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
@@ -109,7 +110,7 @@ class PRChecks:
 
     def run_description_checks(self):
         description = self.pr.body or ""  # body can be None, using empty string for regex matching
-        for check in self.config["pr_checks"]["description"]:
+        for check in self.config["pr_checks"].get("description", []):
             if re.match(check["regex"], description):
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
@@ -118,7 +119,7 @@ class PRChecks:
     def run_files_changed_checks(self):
         files_changed = self.pr.get_files()
         reviewers_to_assign = set()
-        for check in self.config["pr_checks"]["file_path"]:
+        for check in self.config["pr_checks"].get("file_path", []):
             for file in files_changed:
                 if re.match(check["regex"], file.filename):
                     reviewers = check.get("reviewers")
@@ -130,8 +131,8 @@ class PRChecks:
 if __name__ == "__main__":
 
     pr_checks = PRChecks(
-        config_path=os.environ.get("INPUT_CONFIG_FILE"),
-        github_token=os.environ.get("GITHUB_TOKEN"),
+        config_path=os.environ.get("INPUT_CONFIG-FILE"),
+        github_token=os.environ.get("INPUT_GITHUB-TOKEN"),
         event_file=os.environ.get("GITHUB_EVENT_PATH"),
         event_name=os.environ.get("GITHUB_EVENT_NAME"),
         github_url=os.environ.get("GITHUB_API_URL"),
