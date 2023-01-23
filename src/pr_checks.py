@@ -108,7 +108,7 @@ class PRChecks:
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
-                print(f"Title check failed - PR title {title} does not match regex {check['regex']}")
+                print(f"Title check failed - PR title '{title}' does not match regex '{check['regex']}' ")
                 title_success = False
 
             return title_success
@@ -121,7 +121,8 @@ class PRChecks:
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
-                print(f"Description check failed - PR description {description} does not match regex {check['regex']}")
+                print(f"Description check failed - "
+                      f"PR description '{description}' does not match regex '{check['regex']}'")
                 description_success = False
         return description_success
 
