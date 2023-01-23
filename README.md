@@ -35,7 +35,7 @@ The config file is optional and defaults to `.github/pr_checks_config.yaml`.
 It's also important to run this action only on the `pull_request` event, and to specify the types - otherwise 
 the action will not be able to run on editing the pull request.
 
-The action needs `write` permissions to the pull request to create comments, and `read
+The action needs `write` permissions to the pull request to create comments, and `read`
 permissions to contents in order to read the config file, so make sure to specify that in the permissions section.
 
 ## Configuration
