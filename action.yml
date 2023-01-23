@@ -1,0 +1,16 @@
+name: 'Fyle Pr Action'
+description: 'Checks for pull requests'
+inputs:
+  github-token:
+    description: 'GitHub repository token'
+    required: true
+  config-file:
+    description: 'Path to the configuration file'
+    required: true
+    default: '.github/pr_checks_config.yaml'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.github-token }}
+    - ${{ inputs.config-file }}
