@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: run pr checks
-        uses: fylein/fyle-pr-action@v1
+        uses: fylein/fyle-pr-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/pr_checks_config.yaml
@@ -51,16 +51,12 @@ pr_checks:
       regex: '^(fix|feat)'
       message_if_not_matching: 'PR title must start with "fix" or "feat"' # optional
       message_if_matching: 'PR title starts with "fix" or "feat"' # optional - provide at least one of these
-    - name: 'issue_check'
-      regex: 'JIRA-[0-9]+'
-      message_if_not_matching: 'PR title must contain a JIRA issue'
-      message_if_matching: 'PR title contains a JIRA issue'
 
   description:
-    - name: 'docs_check'
-      regex: 'https://docs\.example\.com' # Matching anywhere in the description
-      message_if_not_matching: 'PR description must contain a link to the docs'
-      message_if_matching: 'PR description contains a link to the docs'
+    - name: 'clickup_check'
+      regex: 'app.clickup.com' # Matching anywhere in the description
+      message_if_not_matching: 'PR description must contain a link to a clickup'
+      message_if_matching: 'PR description contains a link to clickup'
 
   file_path:
     - name: 'core_platform'
