@@ -26,7 +26,7 @@ class PRChecks:
         self.event_name = event_name
         self.event = self.load_event(event_file)
         self.repository = self.load_repository()
-
+        self.success = True
         self.config = self.load_config(config_path)
 
     def load_config(self, config_path):
@@ -83,7 +83,7 @@ class PRChecks:
             print(f"Event {self.event_name} not supported, this action only supports pull_request events")
             return False
         try:
-            success = self._run_checks()
+            self._run_checks()
             self.pr.update()
         except github.GithubException as e:
             print(f"Github API error running checks: {e}. Check your configuration file and repository permissions.")
@@ -92,7 +92,7 @@ class PRChecks:
             raise e
         else:
             print("PR checks completed")
-            return success
+        return self.success
 
     def _run_checks(self):
         print(f"Running PR checks for PR #{self.pr.number} ({self.pr.title})")
@@ -102,20 +102,16 @@ class PRChecks:
 
     def run_title_checks(self):
         title = self.pr.title
-        title_success = True
         for check in self.config["pr_checks"].get("title", []):
             if re.search(check["regex"], title):
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
                 print(f"Title check failed - PR title '{title}' does not match regex '{check['regex']}' ")
-                title_success = False
-
-            return title_success
+                self.success = False
 
     def run_description_checks(self):
         description = self.pr.body or ""  # body can be None, using empty string for regex matching
-        description_success = True
         for check in self.config["pr_checks"].get("description", []):
             if re.search(check["regex"], description):
                 self.create_comment_conditionally(check.get("message_if_matching"))
@@ -123,8 +119,7 @@ class PRChecks:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
                 print(f"Description check failed - "
                       f"PR description '{description}' does not match regex '{check['regex']}'")
-                description_success = False
-        return description_success
+                self.success = False
 
     def run_files_changed_checks(self):
         files_changed = self.pr.get_files()
