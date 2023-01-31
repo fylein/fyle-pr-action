@@ -104,7 +104,7 @@ class PRChecks:
         title = self.pr.title
         title_success = True
         for check in self.config["pr_checks"].get("title", []):
-            if re.match(check["regex"], title):
+            if re.search(check["regex"], title):
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
@@ -117,7 +117,7 @@ class PRChecks:
         description = self.pr.body or ""  # body can be None, using empty string for regex matching
         description_success = True
         for check in self.config["pr_checks"].get("description", []):
-            if re.match(check["regex"], description):
+            if re.search(check["regex"], description):
                 self.create_comment_conditionally(check.get("message_if_matching"))
             else:
                 self.create_comment_conditionally(check.get("message_if_not_matching"))
