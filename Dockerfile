@@ -11,7 +11,6 @@ FROM python:3.10-alpine as builder
 
 RUN apk update \
     && apk add build-base libffi-dev \
-#    && pip install --upgrade pip \
     && pip install virtualenv
 
 RUN virtualenv /opt/venv
@@ -28,7 +27,6 @@ RUN pip install -r /tmp/requirements.txt
 FROM python:3.10-alpine
 
 RUN apk update \
-#    && pip install --upgrade pip \
     && pip install virtualenv
 
 COPY --from=builder /opt/venv /opt/venv
