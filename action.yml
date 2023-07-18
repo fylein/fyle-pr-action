@@ -10,7 +10,7 @@ inputs:
     default: '.github/pr_checks_config.yaml'
 runs:
   using: 'docker'
-  image: 'fylehq/fyle-pr-action:v1'
+  image: 'docker://fylehq/fyle-pr-action:v1'
   args:
     - ${{ inputs.github-token }}
     - ${{ inputs.config-file }}
