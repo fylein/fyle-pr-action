@@ -92,7 +92,7 @@ a review request will be sent to the specified reviewers.
 A docker image needs to be built and pushed to docker hub for making use of the changes. To build and push the image, run the following command:
 
 ```bash
-  docker buildx build --platform=linux/amd64 -f ./Dockerfile -t fylehq/fyle-pr-action:v1 --push .
+  docker buildx build --platform=linux/amd64 -t fylehq/fyle-pr-action:v1 --push .
 ```
 
 *__Note__*: If you're getting the  `
