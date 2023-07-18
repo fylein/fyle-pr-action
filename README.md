@@ -87,3 +87,18 @@ Those work exactly the same as title checks, but check the description of the pu
 File path checks are used to check if the pull request contains any files that match a given regex. If there are any matches,
 a review request will be sent to the specified reviewers.
 
+### Deployment
+
+A docker needs to be built and pushed to docker hub for making use of the changes. To build and push the image, run the following command:
+
+```bash
+  docker buildx build --platform=linux/amd64 -f ./Dockerfile -t fylehq/fyle-pr-action:v1 --push .
+```
+
+*__Note__*: If you're getting the  `
+ERROR: multiple platforms feature is currently not supported for docker driver. Please switch to a different driver (eg. "docker buildx create --use")` while running the above command, please run the command: 
+```bash
+  docker buildx create --use
+```
+
+and then run the build command again.
