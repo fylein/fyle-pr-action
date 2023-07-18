@@ -1,12 +1,16 @@
 FROM python:3.10-alpine
 
-ADD . /action
-WORKDIR /action
 # Install dependencies
 
-RUN apk update && apk add build-base libffi-dev
-RUN pip install "Cython<3.0" pyyaml --no-build-isolation
-RUN pip install -r requirements.txt
+RUN apk update \
+    && apk add build-base libffi-dev \
+    && pip install --upgrade pip
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
+
+ADD . /action
+WORKDIR /action
 
 # Set the entrypoint
 ENTRYPOINT ["python", "/action/src/pr_checks.py"]
